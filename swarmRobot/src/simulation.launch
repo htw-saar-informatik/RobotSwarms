@@ -1,0 +1,33 @@
+<launch>
+		<node name="turtlesim_node" pkg="turtlesim" type="turtlesim_node" />
+
+        <!-- <node name="Observer" pkg="swarmRobot" type="Observer" output="screen" /> -->
+		<!-- <node name="Leader" pkg="swarmRobot" type="Leader" output="screen" /> -->
+
+		<node name="FlockRobot0" pkg="swarmRobot" type="FlockRobot" args="0" output="screen" />
+		<node name="FlockRobot1" pkg="swarmRobot" type="FlockRobot" args="1" output="screen" />
+		<node name="FlockRobot2" pkg="swarmRobot" type="FlockRobot" args="2" output="screen" />
+		<node name="FlockRobot3" pkg="swarmRobot" type="FlockRobot" args="3" output="screen" />
+		<node name="FlockRobot4" pkg="swarmRobot" type="FlockRobot" args="4" output="screen" />
+		<!-- <node name="FlockRobot5" pkg="swarmRobot" type="FlockRobot" args="5" output="screen" />
+		<node name="FlockRobot6" pkg="swarmRobot" type="FlockRobot" args="6" output="screen" />
+		<node name="FlockRobot7" pkg="swarmRobot" type="FlockRobot" args="7" output="screen" />
+		<node name="FlockRobot8" pkg="swarmRobot" type="FlockRobot" args="8" output="screen" />
+		<node name="FlockRobot9" pkg="swarmRobot" type="FlockRobot" args="9" output="screen" />
+		<node name="FlockRobot10" pkg="swarmRobot" type="FlockRobot" args="10" output="screen" />
+		<node name="FlockRobot11" pkg="swarmRobot" type="FlockRobot" args="11" output="screen" />
+		<node name="FlockRobot12" pkg="swarmRobot" type="FlockRobot" args="12" output="screen" />
+		<node name="FlockRobot13" pkg="swarmRobot" type="FlockRobot" args="13" output="screen" />
+		<node name="FlockRobot14" pkg="swarmRobot" type="FlockRobot" args="14" output="screen" />
+		<node name="FlockRobot15" pkg="swarmRobot" type="FlockRobot" args="15" output="screen" />
+		<node name="FlockRobot16" pkg="swarmRobot" type="FlockRobot" args="16" output="screen" />
+		<node name="FlockRobot17" pkg="swarmRobot" type="FlockRobot" args="17" output="screen" />
+		<node name="FlockRobot18" pkg="swarmRobot" type="FlockRobot" args="18" output="screen" />
+		<node name="FlockRobot19" pkg="swarmRobot" type="FlockRobot" args="19" output="screen" />
+		<node name="FlockRobot20" pkg="swarmRobot" type="FlockRobot" args="20" output="screen" />
+		<node name="FlockRobot21" pkg="swarmRobot" type="FlockRobot" args="21" output="screen" />
+		<node name="FlockRobot22" pkg="swarmRobot" type="FlockRobot" args="22" output="screen" />
+		<node name="FlockRobot23" pkg="swarmRobot" type="FlockRobot" args="23" output="screen" />
+		<node name="FlockRobot24" pkg="swarmRobot" type="FlockRobot" args="24" output="screen" />
+		<node name="FlockRobot25" pkg="swarmRobot" type="FlockRobot" args="25" output="screen" /> -->
+</launch>

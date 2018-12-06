@@ -1,0 +1,7 @@
+<launch>
+		<node name="turtlesim_node" pkg="turtlesim" type="turtlesim_node" />
+
+		<node name="FlockRobot1" pkg="beginner_tutorials" type="FlockRobot" args="1" output="screen" />
+
+		<!-- <node name="statist1" pkg="beginner_tutorials" type="Statist" args="1" output="screen" /> -->
+</launch>
