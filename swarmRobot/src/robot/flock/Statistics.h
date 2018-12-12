@@ -15,17 +15,16 @@
 #include "../../logger/Logger.h"
 
 std::vector<Robot> getFlockRobots() {
-    std::vector<Robot> flock;
-
-    for (int i = 0; i < FLOCK_SIZE; i++) {
-        flock.push_back(swarm[i]);
+    std::vector<Robot> swarm(mySwarmIndices.size());
+    for (unsigned int i : mySwarmIndices) {
+        swarm.push_back(globalSwarm[i]);
     }
 
-    return flock;
+    return swarm;
 }
 
 void findFlockGroup(std::vector<Robot> &flock, std::vector<Robot> &leftovers) {
-    for (int i = 0; i < flock.size(); i++) {
+    for (unsigned int i = 0; i < flock.size(); i++) {
         const Robot &currentRoboter = flock[i];
 
         auto partitionIterator = std::partition(leftovers.begin(), leftovers.end(), [&currentRoboter](Robot &other) {
@@ -55,23 +54,21 @@ std::vector<std::vector<Robot>> flockGroups() {
     return flocks;
 }
 
-std::vector<Robot> findFlock(const Robot &robot) {
+std::vector<Robot> findFlock(const Robot &self) {
     std::vector<Robot> robotFlock = getFlockRobots();
     std::vector<Robot> myFlock;
-    myFlock.push_back(robot);
+    myFlock.push_back(self);
 
     findFlockGroup(myFlock, robotFlock);
-    auto myPosition = find(myFlock.begin(), myFlock.end(), robot);
-    myFlock.erase(myPosition);
+    myFlock.erase(find(myFlock.begin(), myFlock.end(), self));
 
     return myFlock;
 }
 
-Position flockCentre(std::vector<Robot> flock) {
+Position flockCentre(const std::vector<Robot> &flock) {
     double x = 0, y = 0;
-    Angle angle(0);
 
-    for (Robot &i : flock) {
+    for (const Robot &i : flock) {
         x += i.position.x;
         y += i.position.y;
     }

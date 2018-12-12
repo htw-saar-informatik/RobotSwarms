@@ -11,15 +11,15 @@
 #include <stdarg.h>
 #include "Time.h"
 
-std::string RobotName(int index) {
+std::string RobotName(unsigned int index) {
     return "FlockRobot[" + std::to_string(index) + "]";
 }
 
 enum LOG_LEVEL {
-    NEVER = -1, DEEP_DEBUG = 0, DEBUG = 1, INFO = 2, WARNING = 3, ERROR = 4, CRITICAL = 5
+    NEVER = -1, DEEP_DEBUG = 0, DEBUG = 1, INFO = 2, WARNING = 3, ERROR = 4, CRITICAL = 5, ALWAYS = 6
 };
 
-std::string LOGGER_CAPTION;
+std::string LOGGER_CAPTION = "Name not defined";
 const time_t START_TIME = time(nullptr);
 
 class Logger {
@@ -39,6 +39,7 @@ private:
             case WARNING: return "WARNING";
             case ERROR: return "ERROR";
             case CRITICAL: return "CRITICAL";
+            case ALWAYS: return "ALWAYS";
             default: throw "Logger name not assigned!";
         }
     }
@@ -54,7 +55,7 @@ private:
 public:
     Logger() = delete;
 
-    Logger(LOG_LEVEL logLevel, int restricted) : logLevel(std::move(logLevel)) {
+    Logger(LOG_LEVEL logLevel, unsigned int restricted) : logLevel(std::move(logLevel)) {
         this->restricted = LOGGER_CAPTION.compare(RobotName(restricted)) != 0;
     }
 

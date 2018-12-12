@@ -13,9 +13,14 @@ public:
 
     }
 
-    void move_relative(const float x, const float y) {
-        this->position.x += x;
-        this->position.y += y;
+    void move_relative(const Position &pos) {
+        this->position.x += pos.x;
+        this->position.y += pos.y;
+    }
+
+    void move_absolute(const Position &pos) {
+        this->position.x = pos.x;
+        this->position.y = pos.y;
     }
 
     virtual float max_y() const = 0;
@@ -31,6 +36,11 @@ public:
     virtual ~Geometry() {
 
     }
+
+    std::string toString() const {
+        return "Min_x: " + std::to_string(min_x()) + ", Max_x: " + std::to_string(max_x())
+               + ", Min_y: " + std::to_string(min_y()) + ", Max_y: " + std::to_string(max_y());
+    }
 };
 
 class Rectangle : public Geometry {
@@ -43,16 +53,8 @@ public:
     }
 
     virtual bool inBoundary(const Position &pos) const override {
-        return (pos.x > min_x()) && (pos.x < max_x())
-               && (pos.y > min_y()) && (pos.y < max_y());
-    }
-
-    virtual float max_y() const override {
-        return this->position.y + recSize.y / 2.0f;
-    }
-
-    virtual float min_y() const override {
-        return this->position.y - recSize.y / 2.0f;
+        return (pos.x > min_x()) and (pos.x < max_x())
+               and (pos.y > min_y()) and (pos.y < max_y());
     }
 
     virtual float max_x() const override {
@@ -61,6 +63,14 @@ public:
 
     virtual float min_x() const override {
         return this->position.x - recSize.x / 2.0f;
+    }
+
+    virtual float max_y() const override {
+        return this->position.y + recSize.y / 2.0f;
+    }
+
+    virtual float min_y() const override {
+        return this->position.y - recSize.y / 2.0f;
     }
 };
 

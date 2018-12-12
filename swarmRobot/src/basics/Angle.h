@@ -114,11 +114,7 @@ public:
     }
 
     bool isBetween(float min, float max) const {
-        if (min > max) {
-            std::swap(min, max);
-        }
-
-        return ((value > min) and (value < max));
+        return alg::inRange(this->value, min, max);
     }
 };
 

@@ -2,9 +2,9 @@
 		<node name="turtlesim_node" pkg="turtlesim" type="turtlesim_node" />
 
         <!-- <node name="Observer" pkg="swarmRobot" type="Observer" output="screen" /> -->
-		<!-- <node name="Leader" pkg="swarmRobot" type="Leader" output="screen" /> -->
+		<node name="Leader" pkg="swarmRobot" type="Leader" args="0" output="screen" />
 
-		<node name="FlockRobot0" pkg="swarmRobot" type="FlockRobot" args="0" output="screen" />
+		<!-- <node name="FlockRobot0" pkg="swarmRobot" type="FlockRobot" args="0" output="screen" /> -->
 		<node name="FlockRobot1" pkg="swarmRobot" type="FlockRobot" args="1" output="screen" />
 		<node name="FlockRobot2" pkg="swarmRobot" type="FlockRobot" args="2" output="screen" />
 		<node name="FlockRobot3" pkg="swarmRobot" type="FlockRobot" args="3" output="screen" />

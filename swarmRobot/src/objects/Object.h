@@ -22,9 +22,15 @@ public:
         addShape(movableGeometry);
     }
 
-    void move_relative(const float x, const float y) {
+    void move_relative(const Position &pos) {
         for (const auto &i : shapes) {
-            i->move_relative(x, y);
+            i->move_relative(pos);
+        }
+    }
+
+    void move_absolute(const Position &pos) {
+        for (const auto &i : shapes) {
+            i->move_absolute(pos);
         }
     }
 
@@ -39,7 +45,6 @@ public:
             }
         }
 
-        Logger(CRITICAL, 4, "Not in shape boundary");
         return false;
     }
 
@@ -70,4 +75,10 @@ public:
     }
 
     Object &operator=(Object &other) = delete;
+
+    void print() const {
+        for (const auto &s : shapes) {
+            Logger(ALWAYS, 1, s->toString());
+        }
+    }
 };

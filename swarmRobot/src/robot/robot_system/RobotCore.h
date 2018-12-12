@@ -22,15 +22,11 @@
 
 class RobotCore {
 public:
-    explicit RobotCore(int index, bool disablePen = true) : myIndex(index) {
+    explicit RobotCore(unsigned int index, bool disablePen = true) : myIndex(index) {
         long seed = std::chrono::system_clock::now().time_since_epoch().count();
         rndGenerator = std::default_random_engine(static_cast<unsigned long>(seed * myIndex));
-        rndDistributor = std::uniform_real_distribution<float>(-FLOCK_RANDOM_TURN_DEGREE / 2.0,
-                                                               FLOCK_RANDOM_TURN_DEGREE / 2.0);
-
         auto spawnDistributor = std::uniform_real_distribution<float>(BORDER.getSize().x, BORDER.getSize().y);
-
-        const Angle &spawnAngle = Angle(std::uniform_real_distribution<float>(0, 360)(rndGenerator));
+        const Angle &spawnAngle = Angle(rndDistributor(rndGenerator));
 
         this->topic = "turtle" + std::to_string(myIndex);
 
@@ -39,12 +35,10 @@ public:
         spawn(spawnPosition, spawnAngle, disablePen);
     }
 
-    explicit RobotCore(int index, const Position &spawnPosition, const Angle &spawnAngle, bool disablePen = true)
+    explicit RobotCore(unsigned int index, const Position &spawnPosition, const Angle &spawnAngle, bool disablePen = true)
             : myIndex(index) {
         long seed = std::chrono::system_clock::now().time_since_epoch().count();
         rndGenerator = std::default_random_engine(static_cast<unsigned long>(seed * myIndex));
-        rndDistributor = std::uniform_real_distribution<float>(-FLOCK_RANDOM_TURN_DEGREE / 2.0,
-                                                               FLOCK_RANDOM_TURN_DEGREE / 2.0);
 
         this->topic = "turtle" + std::to_string(myIndex);
 
@@ -57,7 +51,7 @@ public:
         t.request.x = this->position().x;
         t.request.y = this->position().y;
         t.request.theta = degree.toRad();
-        serviceClient_teleportAbsolute.call(t);
+        teleportAbsoluteService.call(t);
     }
 
     void teleport_absolute(const Position &pos, const Angle &teleportAngle) {
@@ -67,13 +61,13 @@ public:
         t.request.theta = teleportAngle.toRad();
 
         ros::service::waitForService(topic + "/teleport_absolute");
-        serviceClient_teleportAbsolute.call(t);
+        teleportAbsoluteService.call(t);
     }
 
     void turn_teleport_relative(const Angle &degree) {
         turtlesim::TeleportRelative t;
         t.request.angular = degree.toRad();
-        serviceClient_teleportRelative.call(t);
+        teleportRelativeService.call(t);
     }
 
     Position position() const {
@@ -81,7 +75,11 @@ public:
     }
 
     Robot self() const {
-        return swarm[static_cast<unsigned long>(myIndex)];
+        return globalSwarm[myIndex];
+    }
+
+    unsigned int getIndex() const {
+        return myIndex;
     }
 
 private:
@@ -94,55 +92,62 @@ private:
             s.request.name = this->topic;
 
             ros::service::waitForService("spawn");
-            if (!node.serviceClient<turtlesim::Spawn>("spawn").call(s)) {
-                Logger(ERROR, "Error spawning turtle: " + this->topic);
-            }
-
+            alg::assertTrue(node.serviceClient<turtlesim::Spawn>("spawn").call(s),
+                            "Error spawning turtle: " + this->topic);
             if (disablePen) setOffPen();
         } else {
             if (disablePen) setOffPen();
             teleport_absolute(spawnPosition, 0);
         }
 
-        Logger(INFO, topic + " spawned");
+        Logger(ALWAYS, topic + " spawned");
     }
 
     void initNodes() {
-        this->publisher = node.advertise<geometry_msgs::Twist>(topic + "/cmd_vel", 1);
-        this->serviceClient_teleportAbsolute = node.serviceClient<turtlesim::TeleportAbsolute>(
-                topic + "/teleport_absolute");
-        this->serviceClient_teleportRelative = node.serviceClient<turtlesim::TeleportRelative>(
-                topic + "/teleport_relative");
-        this->missionSubscriber = node.subscribe("flock", 1, missionCallback);
+        movePublisher = node.advertise<geometry_msgs::Twist>(topic + "/cmd_vel", 1);
+        alg::assertNotNull(movePublisher, "MovePublisher");
+
+        teleportAbsoluteService = node.serviceClient<turtlesim::TeleportAbsolute>(topic + "/teleport_absolute");
+        alg::assertNotNull(teleportAbsoluteService, "TeleportAbsoluteService");
+
+        teleportRelativeService = node.serviceClient<turtlesim::TeleportRelative>(topic + "/teleport_relative");
+        alg::assertNotNull(teleportRelativeService, "TeleportRelativeService");
+
+        const boost::function<void(const swarmRobot::MissionNewConstPtr &)> &callback = bind(missionNewCallback, _1,
+                                                                                          myIndex);
+        missionSubscriber = node.subscribe(TOPIC_MISSION_NEW, 1, callback);
+        alg::assertNotNull(missionSubscriber, "MissionSubscriber");
+
+        missionInPositionSubscriber = node.subscribe(TOPIC_MISSION_IN_POSITION, 1, missionInPositionCallback);
+        alg::assertNotNull(missionInPositionSubscriber, "MissionInPositionSubscriber");
     }
 
     void setOffPen() {
         turtlesim::SetPen pen;
         pen.request.off = 1;
         ros::service::waitForService(topic + "/set_pen");
-
-        if (!node.serviceClient<turtlesim::SetPen>(topic + "/set_pen").call(pen)) {
-            Logger(ERROR, "Setting off pen failed!");
-        }
+        alg::assertTrue(node.serviceClient<turtlesim::SetPen>(topic + "/set_pen").call(pen),
+                "Setting off pen failed!");
     }
 
 protected:
     ros::NodeHandle node;
-    ros::ServiceClient serviceClient_teleportAbsolute;
-    ros::ServiceClient serviceClient_teleportRelative;
+    ros::ServiceClient teleportAbsoluteService;
+    ros::ServiceClient teleportRelativeService;
     ros::Subscriber missionSubscriber;
-    ros::Publisher publisher;
+    ros::Subscriber missionInPositionSubscriber;
+    ros::Publisher movePublisher;
     ros::Rate sleeper = ros::Rate(0.9);
 
     std::string topic;
-    int myIndex;
+    unsigned int myIndex;
 
+    std::uniform_real_distribution<float> rndDistributor{0, 360};
     std::default_random_engine rndGenerator;
-    std::uniform_real_distribution<float> rndDistributor;
 
     void refreshPosition() {
-        publisher.publish(geometry_msgs::Twist());
-        ros::Rate(1).sleep();
+        movePublisher.publish(geometry_msgs::Twist());
+        sleeper.sleep();
         ros::spinOnce();
     }
 };
