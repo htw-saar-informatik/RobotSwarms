@@ -17,7 +17,7 @@
 #include <cmath>
 
 std::array<Robot, FLOCK_SIZE> globalSwarm;
-std::vector<unsigned int> mySwarmIndices(FLOCK_SIZE);
+std::vector<unsigned int> mySwarmIndices;
 std::vector<unsigned int> robotsNotInPosition;
 
 void flockCallback(const turtlesim::PoseConstPtr &msg, const unsigned int index) {
@@ -38,40 +38,42 @@ void subscribeToFlock() {
 
     for (int i = 0; i < FLOCK_SIZE; i++) {
         boost::function<void(const turtlesim::PoseConstPtr &)> callback = bind(flockCallback, _1, i);
-        flockSubscriber.push_back(node.subscribe("turtle" + std::to_string(i) + "/pose", 1, callback));
+        flockSubscriber.push_back(node.subscribe("turtle" + std::to_string(i) + "/pose", 100, callback));
     }
 }
 
 std::vector<swarmRobot::MissionNewConstPtr> missions;
 void missionNewCallback(const swarmRobot::MissionNewConstPtr &mission, const unsigned int index) {
-    Logger(INFO, "Got a new mission: Robots %d - %d", mission->robot_index_from, mission->robot_index_to)
+    const std::pair<unsigned int, unsigned int> range(mission->robot_index_from, mission->robot_index_to);
+
+    Logger(INFO, "Got a new mission: Robots %d - %d", range.first, range.second)
             .newLine("Object: pos(%f, %f)", mission->object_position_x, mission->object_position_y)
             .newLine("Object: size(%f, %f)", mission->object_size_x, mission->object_size_y)
             .newLine("Target: (%f, %f)", mission->target_x, mission->target_y);
 
-    const std::pair<unsigned int, unsigned int> range(mission->robot_index_from, mission->robot_index_to);
-    if (alg::inRange<unsigned int>(index, mission->robot_index_from, mission->robot_index_to)) {
+
+    if (alg::inRange<unsigned int>(index, range.first, range.second)) {
         missions.push_back(mission);
 
-        std::remove_if(mySwarmIndices.begin(), mySwarmIndices.end(), [range](unsigned int i) {
-            return !alg::inRange<unsigned int>(i, range.first, range.second);
-        });
-
-        for (unsigned int i = mission->robot_index_from; i < (mission->robot_index_to+1); i++) {
+        mySwarmIndices.clear();
+        for (unsigned int i = range.first; i < range.second; i++) {
+            mySwarmIndices.push_back(i);
             robotsNotInPosition.push_back(i);
         }
     } else {
-        std::remove_if(mySwarmIndices.begin(), mySwarmIndices.end(), [range](unsigned int i) {
+        auto newEnd = std::remove_if(mySwarmIndices.begin(), mySwarmIndices.end(), [range](unsigned int i) {
             return alg::inRange<unsigned int>(i, range.first, range.second);
         });
+        mySwarmIndices.erase(newEnd, mySwarmIndices.end());
     }
 }
 
 void missionInPositionCallback(const swarmRobot::MissionFinishedConstPtr &index) {
     auto pos = std::find(robotsNotInPosition.begin(), robotsNotInPosition.end(), index->index);
-    if (pos != robotsNotInPosition.end()) {
-        robotsNotInPosition.erase(pos);
+    if (pos == robotsNotInPosition.end()) {
+        return;
     }
+    robotsNotInPosition.erase(pos);
 
     std::string left;
     for (unsigned int i : robotsNotInPosition) left += std::to_string(i) + ", ";

@@ -81,4 +81,22 @@ public:
             Logger(ALWAYS, 1, s->toString());
         }
     }
+
+    std::string toString() const {
+        std::ostringstream out;
+        float min_x(99), min_y(99), max_x(0), max_y(0);
+        for (const auto &i : shapes) {
+            alg::makeMax(max_x, i->max_x());
+            alg::makeMax(max_y, i->max_y());
+            alg::makeMin(min_x, i->min_x());
+            alg::makeMin(min_y, i->min_y());
+        }
+
+        out.precision(3);
+        out << "MinX: " << min_x
+            << ", MaxX: " << max_x
+            << ", MinY: " << min_y
+            << ", MaxY: " << max_y;
+        return out.str();
+    }
 };

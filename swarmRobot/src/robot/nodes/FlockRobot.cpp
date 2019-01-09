@@ -14,54 +14,52 @@ void transport(RobotPilot &pilot, swarmRobot::MissionNewConstPtr mission, ros::N
     ));
     Position destination{mission->target_x, mission->target_y};
 
-    bool startTransport = false;
-    while (ros::ok() and (destination.distance(object.getCentre()) > 0.01f)) {
+    // Move to object
+    while (!object.inBoundary(pilot.position()) and ros::ok()) {
+        Logger(WARNING, "Moving to object")
+                .newLine("Object: %s, Self: %s", object.toString().c_str(), pilot.self().position.toString().c_str());
+        pilot.moveTo(object.getCentre());
+    }
+
+    // Wait for other robots
+    while (!robotsNotInPosition.empty() and ros::ok()) {
+        swarmRobot::MissionFinished msg;
+        msg.index = static_cast<uint8_t>(pilot.getIndex());
+        missionInPositionAdvertiser.publish(msg);
+
+        pilot.hold();
+    }
+
+    Logger(INFO, "All robots in position. Starting transport");
+
+    // Transport
+    while (ros::ok() and (destination.distance(object.getCentre()) > 0.05f)) {
         float currentSpeed = ROBOT_SPEED * 0.25f;
 
         std::vector<Robot> missionRobots;
-        //for (unsigned int i : mySwarmIndices) {
-        for (unsigned int i = mission->robot_index_from; i < (mission->robot_index_to + 1); i++) {
+        for (unsigned int i = mission->robot_index_from; i < mission->robot_index_to; i++) {
             missionRobots.push_back(globalSwarm[i]);
         }
 
-        if (object.inBoundary(pilot.self().position)) { // Trigger for starting the transport
-            static bool didReport = false;
-            if (!didReport) {
-                swarmRobot::MissionFinished msg;
-                msg.index = (uint8_t) pilot.getIndex();
-                missionInPositionAdvertiser.publish(msg);
-                Logger(INFO, "Im in position");
-                didReport = true;
-            }
-        }
-
-        if (robotsNotInPosition.empty()) { // Moves only if robots are in position
-            const Position &flockPos = flockCentre(missionRobots);
-            object.move_absolute(flockPos);
-
-            if (!startTransport) {
-                Logger(INFO, "All robots in position. Starting transport");
-                startTransport = true;
-            }
-        }
+        object.move_absolute(flockCentre(missionRobots));
 
         if (!object.inBoundary(pilot.position())) {
-            pilot.moveTo(object.getCentre());
+            Logger(WARNING, "Moving to object")
+                    .newLine("Object: %s, Self: %s", object.toString().c_str(), pilot.self().position.toString().c_str());
+            pilot.moveTo(object.getCentre(), false, currentSpeed);
         } else {
-            if (!startTransport) {
-                pilot.hold();
-            } else {
-                Angle turnAngle = pilot.nextStep_withNoise();
-
-                while ((!pilot.makeMoveLegal(turnAngle, currentSpeed * 1.5f, object)) && ros::ok()) {
-                    currentSpeed *= 0.9f;
-                    usleep(1);
-                    ros::spinOnce();
-                }
-
-                pilot.move(turnAngle, false, currentSpeed);
+            //Logger(WARNING, "Object: %s, Self: %s", object.toString().c_str(), pilot.position().toString().c_str());
+            Angle turnAngle = pilot.nextStep_withNoise();
+            while ((!pilot.makeMoveLegal(turnAngle, currentSpeed * 1.5f, object)) && ros::ok()) {
+                currentSpeed *= 0.9f;
+                usleep(1);
+                ros::spinOnce();
             }
+
+            pilot.move(turnAngle, false, currentSpeed);
         }
+
+        Logger(WARNING, 4, object.getCentre().toString());
     }
 }
 
@@ -81,6 +79,10 @@ void loop(RobotPilot &pilot) {
             Logger(INFO, "Mission finished");
             missions.pop_back();
             missionFinishedAdvertiser.publish(msg);
+
+            while (ros::ok()) {
+                pilot.hold();
+            }
         }
     }
 }

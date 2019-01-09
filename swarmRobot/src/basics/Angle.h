@@ -4,12 +4,13 @@
 // Created by smanier on 20.10.18.
 //
 
-#ifndef PROJECT_ANGLE_H
-#define PROJECT_ANGLE_H
+#pragma once
 
 
 #include <cmath>
 #include <algorithm>
+#include "../various/Constants.h"
+#include "MyAlgorithms.h"
 
 class Angle {
 private:
@@ -25,7 +26,7 @@ public:
     }
 
     Angle(float vec_x, float vec_y) {
-        value = std::atan2(vec_y, vec_x) * 180.0f / SMALL_PI;
+        value = std::atan2(vec_y, vec_x) * 180.0f / static_cast<float>(M_PI);
         normalize();
     }
 
@@ -90,10 +91,10 @@ public:
     }
 
     float toRad() const {
-        float rad = value / 180.0f * SMALL_PI;
+        float rad = value / 180.0f * static_cast<float>(M_PI);
 
         if (rad > M_PI) {
-            rad = (2.0f * SMALL_PI) - rad;
+            rad = (2.0f * static_cast<float>(M_PI)) - rad;
             rad *= -1.0f;
         }
 
@@ -134,6 +135,3 @@ Angle radToDegree(float rad) {
     if (degree < 0.0) degree += 360.0f;
     return degree;
 }
-
-
-#endif //PROJECT_ANGLE_H

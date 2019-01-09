@@ -8,6 +8,8 @@
 #include <stdexcept>
 #include <string>
 #include <array>
+#include <vector>
+#include <algorithm>
 
 std::string exec(const char* cmd) {
     std::array<char, 128> buffer;
@@ -22,6 +24,26 @@ std::string exec(const char* cmd) {
 }
 
 int main(int argv, char **argc) {
-    auto test = 1 + " ";
-    
+    std::vector<int> a = {1, 2, 3, 4, 5, 6};
+
+    while (a.size() > 0) {
+        int num;
+        std::cin >> num;
+
+        auto pos = std::remove_if(a.begin(), a.end(), [num](int i) {
+            return i < num;
+        });
+        std::for_each(a.begin(), a.end(), [](int i) {
+            std::cout << i << " ";
+        });
+        std::cout << std::endl;
+
+        a.erase(pos, a.end());
+        std::for_each(a.begin(), a.end(), [](int i) {
+            std::cout << i << " ";
+        });
+        std::cout << std::endl;
+    }
+
+    return 0;
 }

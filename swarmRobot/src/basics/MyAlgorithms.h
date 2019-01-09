@@ -5,6 +5,7 @@
 #pragma once
 
 #include <algorithm>
+#include "../logger/Logger.h"
 
 namespace alg {
     /**
@@ -62,7 +63,7 @@ namespace alg {
     template<typename T>
     bool inRange(const T number, T from, T to) {
         sort(from, to);
-        return (number >= from) and (number <= to);
+        return (number >= from) and (number < to);
     }
 
     /**

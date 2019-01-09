@@ -26,7 +26,7 @@ class Logger {
 private:
     const LOG_LEVEL LEVEL_OF_LOGGING = INFO;
 
-    static const int BUFFER_SIZE = 200;
+    static const int BUFFER_SIZE = 500;
     const LOG_LEVEL logLevel;
     bool restricted = false;
 

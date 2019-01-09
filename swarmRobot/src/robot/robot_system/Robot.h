@@ -36,10 +36,7 @@ struct Robot : public Circle {
     }
 
     Angle angleTo(const Position &destination) const {
-        float x_distance = destination.x - position.x;
-        float y_distance = destination.y - position.y;
-
-        return Angle(x_distance, y_distance);
+        return position.angleTo(destination);
     }
 
     Angle getRelativeAngle(const Position &destination) const {
@@ -50,8 +47,8 @@ struct Robot : public Circle {
 
     Position simulateMovement(Angle angle, const float speed) const {
         Position newPos = this->position;
-        newPos.x += cosf(angle.get() * SMALL_PI / 180.0f) * speed;
-        newPos.y += sinf(angle.get() * SMALL_PI / 180.0f) * speed;
+        newPos.x += cosf(angle.get() * static_cast<float>(M_PI) / 180.0f) * speed;
+        newPos.y += sinf(angle.get() * static_cast<float>(M_PI) / 180.0f) * speed;
         return newPos;
     }
 
@@ -74,5 +71,15 @@ struct Robot : public Circle {
         return *this;
     }
 };
+
+namespace myString {
+    std::string toString(const std::vector<Robot> &vec) {
+        std::ostringstream out;
+        for (const Robot &r : vec) {
+            out << r.toString() << ", ";
+        }
+        return out.str();
+    }
+}
 
 #endif //PROJECT_TURTLEPOSITION_H

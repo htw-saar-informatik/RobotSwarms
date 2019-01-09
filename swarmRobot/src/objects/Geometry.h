@@ -37,9 +37,9 @@ public:
 
     }
 
-    std::string toString() const {
-        return "Min_x: " + std::to_string(min_x()) + ", Max_x: " + std::to_string(max_x())
-               + ", Min_y: " + std::to_string(min_y()) + ", Max_y: " + std::to_string(max_y());
+    virtual std::string toString() const {
+        return "Min_x: " + myString::toString(min_x()) + ", Max_x: " + myString::toString(max_x())
+               + ", Min_y: " + myString::toString(min_y()) + ", Max_y: " + myString::toString(max_y());
     }
 };
 
