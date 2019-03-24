@@ -1,3 +1,6 @@
+uint8 number_leaders
+uint64 id
+
 uint8 robot_index_from
 uint8 robot_index_to
 

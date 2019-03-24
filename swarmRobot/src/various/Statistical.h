@@ -65,13 +65,13 @@ public:
     }
 
     void print() {
-        file << "NumberOfRobots;"
+        /*file << "NumberOfRobots;"
              << "Observations;"
              << "Time(s);"
              << "LeaderDidntMove;"
              << "LengthOfDrivenWay;"
              << "LengthOfSlack;"
-             << std::endl;
+             << std::endl;*/
         file << numberOfRobots << ";"
              << observations << ";"
              << time(0) - startTime << ";"
@@ -80,6 +80,10 @@ public:
              << lengthOfSlack << ";"
              << std::endl;
         Logger(INFO, "FINISHED!").newLine("File written:").newLine("-> " + fileName);
+    }
+
+    void abort() {
+        file << "===== TIMEOUT ABORT =====" << std::endl;
     }
 
     ~Statistical() {

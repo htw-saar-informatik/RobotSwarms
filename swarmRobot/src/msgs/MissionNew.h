@@ -24,7 +24,9 @@ struct MissionNew_
   typedef MissionNew_<ContainerAllocator> Type;
 
   MissionNew_()
-    : robot_index_from(0)
+    : number_leaders(0)
+    , id(0)
+    , robot_index_from(0)
     , robot_index_to(0)
     , object_position_x(0.0)
     , object_position_y(0.0)
@@ -34,7 +36,9 @@ struct MissionNew_
     , target_y(0.0)  {
     }
   MissionNew_(const ContainerAllocator& _alloc)
-    : robot_index_from(0)
+    : number_leaders(0)
+    , id(0)
+    , robot_index_from(0)
     , robot_index_to(0)
     , object_position_x(0.0)
     , object_position_y(0.0)
@@ -46,6 +50,12 @@ struct MissionNew_
     }
 
 
+
+   typedef uint8_t _number_leaders_type;
+  _number_leaders_type number_leaders;
+
+   typedef uint64_t _id_type;
+  _id_type id;
 
    typedef uint8_t _robot_index_from_type;
   _robot_index_from_type robot_index_from;
@@ -149,12 +159,12 @@ struct MD5Sum< ::swarmRobot::MissionNew_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "5e1cd4c10d54bb7d598e1f2c09b673eb";
+    return "8fc4da6d68487d4cafd610b43ada4e76";
   }
 
   static const char* value(const ::swarmRobot::MissionNew_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x5e1cd4c10d54bb7dULL;
-  static const uint64_t static_value2 = 0x598e1f2c09b673ebULL;
+  static const uint64_t static_value1 = 0x8fc4da6d68487d4cULL;
+  static const uint64_t static_value2 = 0xafd610b43ada4e76ULL;
 };
 
 template<class ContainerAllocator>
@@ -173,7 +183,10 @@ struct Definition< ::swarmRobot::MissionNew_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "uint8 robot_index_from\n\
+    return "uint8 number_leaders\n\
+uint64 id\n\
+\n\
+uint8 robot_index_from\n\
 uint8 robot_index_to\n\
 \n\
 float32 object_position_x\n\
@@ -202,6 +215,8 @@ namespace serialization
   {
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
+      stream.next(m.number_leaders);
+      stream.next(m.id);
       stream.next(m.robot_index_from);
       stream.next(m.robot_index_to);
       stream.next(m.object_position_x);
@@ -228,6 +243,10 @@ struct Printer< ::swarmRobot::MissionNew_<ContainerAllocator> >
 {
   template<typename Stream> static void stream(Stream& s, const std::string& indent, const ::swarmRobot::MissionNew_<ContainerAllocator>& v)
   {
+    s << indent << "number_leaders: ";
+    Printer<uint8_t>::stream(s, indent + "  ", v.number_leaders);
+    s << indent << "id: ";
+    Printer<uint64_t>::stream(s, indent + "  ", v.id);
     s << indent << "robot_index_from: ";
     Printer<uint8_t>::stream(s, indent + "  ", v.robot_index_from);
     s << indent << "robot_index_to: ";

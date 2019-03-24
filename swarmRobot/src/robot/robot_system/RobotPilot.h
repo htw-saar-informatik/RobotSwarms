@@ -75,18 +75,18 @@ public:
         return false;
     }
 
-    bool predictLegalMove(const Position &destination, const Object &stayIn) {
-        return stayIn.inBoundary(destination) and !predictRobotCollision(destination);
+    bool predictLegalMove(const Position &destination) {
+        return BORDER.inBoundary(destination) and !predictRobotCollision(destination);
     }
 
-    bool makeMoveLegal(Angle &turnAngle, const float speed, const Object &stayIn) {
+    bool makeMoveLegal(Angle &turnAngle, const float speed) {
         for (int i = 0; i < 181; i++) {
-            if (predictLegalMove(self().simulateMovement(turnAngle + i, speed), stayIn)) {
+            if (predictLegalMove(self().simulateMovement(turnAngle + i, speed))) {
                 turnAngle += i;
                 return true;
             }
 
-            if (predictLegalMove(self().simulateMovement(turnAngle - i, speed), stayIn)) {
+            if (predictLegalMove(self().simulateMovement(turnAngle - i, speed))) {
                 turnAngle -= i;
                 return true;
             }
@@ -100,6 +100,8 @@ public:
             hold();
         }
     }
+
+    RobotPilot& operator=(const RobotPilot &other) = delete;
 
     ~RobotPilot() = default;
 
@@ -132,7 +134,7 @@ private:
     // ========== ========== ========= ========== ==========
 
     void move_internal_relative(Angle &turnAngle, float speed) {
-        makeMoveLegal(turnAngle, speed, BORDER);
+        makeMoveLegal(turnAngle, speed);
 
         const Angle &relativeTurnAngle = turnAngle - self().angle;
         this->turn_teleport_relative(relativeTurnAngle);

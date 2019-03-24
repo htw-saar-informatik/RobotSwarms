@@ -104,7 +104,7 @@ private:
     }
 
     void initNodes() {
-        movePublisher = node.advertise<geometry_msgs::Twist>(topic + "/cmd_vel", 100);
+        movePublisher = node.advertise<geometry_msgs::Twist>(topic + "/cmd_vel", ROS_QUEUE_SIZE);
         alg::assertNotNull(movePublisher, "MovePublisher");
 
         teleportAbsoluteService = node.serviceClient<turtlesim::TeleportAbsolute>(topic + "/teleport_absolute");
@@ -115,10 +115,10 @@ private:
 
         const boost::function<void(const swarmRobot::MissionNewConstPtr &)> &callback = bind(missionNewCallback, _1,
                                                                                           myIndex);
-        missionSubscriber = node.subscribe(TOPIC_MISSION_NEW, 100, callback);
+        missionSubscriber = node.subscribe(TOPIC_MISSION_NEW, ROS_QUEUE_SIZE, callback);
         alg::assertNotNull(missionSubscriber, "MissionSubscriber");
 
-        missionInPositionSubscriber = node.subscribe(TOPIC_MISSION_IN_POSITION, 100, missionInPositionCallback);
+        missionInPositionSubscriber = node.subscribe(TOPIC_MISSION_IN_POSITION, ROS_QUEUE_SIZE, missionInPositionCallback);
         alg::assertNotNull(missionInPositionSubscriber, "MissionInPositionSubscriber");
     }
 

@@ -43,17 +43,6 @@ namespace alg {
     }
 
     /**
-     * Tests if number is in range of the given range
-     * @param number The value to test
-     * @param range The range to test
-     * @return True if the number is in range, else false
-     */
-    template<typename T>
-    bool inRange(const T number, const std::pair<T, T> range) {
-        return inRange(number, range.first, range.second);
-    }
-
-    /**
      * Tests if number is in range of the given numbers
      * @param number The value to test
      * @param from The buttom of the range

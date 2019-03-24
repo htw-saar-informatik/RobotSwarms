@@ -24,17 +24,22 @@ struct MissionFinished_
   typedef MissionFinished_<ContainerAllocator> Type;
 
   MissionFinished_()
-    : index(0)  {
+    : robotIndex(0)
+    , missionId(0)  {
     }
   MissionFinished_(const ContainerAllocator& _alloc)
-    : index(0)  {
+    : robotIndex(0)
+    , missionId(0)  {
   (void)_alloc;
     }
 
 
 
-   typedef uint8_t _index_type;
-  _index_type index;
+   typedef uint8_t _robotIndex_type;
+  _robotIndex_type robotIndex;
+
+   typedef uint64_t _missionId_type;
+  _missionId_type missionId;
 
 
 
@@ -114,12 +119,12 @@ struct MD5Sum< ::swarmRobot::MissionFinished_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "9865c521c6f40dd504cfcb9a4dfb1268";
+    return "3bdf639da7802051394d7d5dfd081129";
   }
 
   static const char* value(const ::swarmRobot::MissionFinished_<ContainerAllocator>&) { return value(); }
-  static const uint64_t static_value1 = 0x9865c521c6f40dd5ULL;
-  static const uint64_t static_value2 = 0x04cfcb9a4dfb1268ULL;
+  static const uint64_t static_value1 = 0x3bdf639da7802051ULL;
+  static const uint64_t static_value2 = 0x394d7d5dfd081129ULL;
 };
 
 template<class ContainerAllocator>
@@ -138,7 +143,8 @@ struct Definition< ::swarmRobot::MissionFinished_<ContainerAllocator> >
 {
   static const char* value()
   {
-    return "uint8 index\n\
+    return "uint8 robotIndex\n\
+uint64 missionId\n\
 ";
   }
 
@@ -157,7 +163,8 @@ namespace serialization
   {
     template<typename Stream, typename T> inline static void allInOne(Stream& stream, T m)
     {
-      stream.next(m.index);
+      stream.next(m.robotIndex);
+      stream.next(m.missionId);
     }
 
     ROS_DECLARE_ALLINONE_SERIALIZER
@@ -176,8 +183,10 @@ struct Printer< ::swarmRobot::MissionFinished_<ContainerAllocator> >
 {
   template<typename Stream> static void stream(Stream& s, const std::string& indent, const ::swarmRobot::MissionFinished_<ContainerAllocator>& v)
   {
-    s << indent << "index: ";
-    Printer<uint8_t>::stream(s, indent + "  ", v.index);
+    s << indent << "robotIndex: ";
+    Printer<uint8_t>::stream(s, indent + "  ", v.robotIndex);
+    s << indent << "missionId: ";
+    Printer<uint64_t>::stream(s, indent + "  ", v.missionId);
   }
 };
 

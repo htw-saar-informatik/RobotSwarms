@@ -17,6 +17,8 @@ add_message_files(
         DIRECTORY msg FILES
         MissionNew.msg
         MissionFinished.msg
+        UpdateShape.msg
+        RobotIndex.msg
 )
 
 ## Generate services in the 'srv' folder
@@ -40,19 +42,16 @@ include_directories(
 
 ## Thesis
 
-add_executable(FlockRobot src/robot/robot_system/RobotPilot.h src/robot/nodes/FlockRobot.cpp src/robot/robot_system/Robot.h src/robot/flock/FlockControl.h src/various/Constants.h src/robot/flock/Statistics.h src/basics/Angle.h src/logger/Logger.h src/logger/Time.h src/objects/Object.h src/objects/Geometry.h src/basics/BasicStructs.h src/robot/robot_system/RobotCore.h src/basics/MyAlgorithms.h src/various/Statistical.h src/basics/ToString.h)
+add_executable(FlockRobot src/robot/robot_system/RobotPilot.h src/robot/nodes/FlockRobot.cpp src/robot/robot_system/Robot.h src/robot/flock/FlockControl.h src/various/Constants.h src/robot/flock/Statistics.h src/basics/Angle.h src/logger/Logger.h src/logger/Time.h src/objects/Object.h src/objects/Geometry.h src/basics/BasicStructs.h src/robot/robot_system/RobotCore.h src/basics/MyAlgorithms.h src/various/Statistical.h src/basics/ToString.h src/basics/Range.h src/basics/Position.h)
 target_link_libraries(FlockRobot ${catkin_LIBRARIES})
 
-add_executable(Observer src/robot/robot_system/RobotPilot.h src/robot/nodes/Observer.cpp src/robot/robot_system/Robot.h src/robot/flock/FlockControl.h src/various/Constants.h src/robot/flock/Statistics.h src/basics/Angle.h src/logger/Logger.h src/logger/Time.h src/objects/Object.h src/objects/Geometry.h src/basics/BasicStructs.h src/robot/robot_system/RobotCore.h src/basics/MyAlgorithms.h src/various/Statistical.h src/basics/ToString.h)
+add_executable(Observer src/robot/robot_system/RobotPilot.h src/robot/nodes/Observer.cpp src/robot/robot_system/Robot.h src/robot/flock/FlockControl.h src/various/Constants.h src/robot/flock/Statistics.h src/basics/Angle.h src/logger/Logger.h src/logger/Time.h src/objects/Object.h src/objects/Geometry.h src/basics/BasicStructs.h src/robot/robot_system/RobotCore.h src/basics/MyAlgorithms.h src/various/Statistical.h src/basics/ToString.h src/basics/Range.h src/basics/Position.h)
 target_link_libraries(Observer ${catkin_LIBRARIES})
 
-add_executable(Leader src/robot/robot_system/RobotPilot.h src/robot/nodes/Leader.cpp src/robot/robot_system/Robot.h src/robot/flock/FlockControl.h src/various/Constants.h src/robot/flock/Statistics.h src/basics/Angle.h src/logger/Logger.h src/logger/Time.h src/objects/Object.h src/objects/Geometry.h src/basics/BasicStructs.h src/robot/robot_system/RobotCore.h src/basics/MyAlgorithms.h src/various/Statistical.h src/basics/ToString.h)
-target_link_libraries(Leader ${catkin_LIBRARIES})
-
-add_executable(Statist src/robot/robot_system/RobotPilot.h src/robot/robot_system/Robot.h src/robot/flock/FlockControl.h src/various/Constants.h src/robot/flock/Statistics.h src/robot/nodes/Statist.cpp src/basics/Angle.h src/logger/Logger.h src/logger/Time.h src/objects/Object.h src/objects/Geometry.h src/basics/BasicStructs.h src/robot/robot_system/RobotCore.h src/basics/MyAlgorithms.h src/various/Statistical.h src/basics/ToString.h)
+add_executable(Statist src/robot/robot_system/RobotPilot.h src/robot/robot_system/Robot.h src/robot/flock/FlockControl.h src/various/Constants.h src/robot/flock/Statistics.h src/robot/nodes/Statist.cpp src/basics/Angle.h src/logger/Logger.h src/logger/Time.h src/objects/Object.h src/objects/Geometry.h src/basics/BasicStructs.h src/robot/robot_system/RobotCore.h src/basics/MyAlgorithms.h src/various/Statistical.h src/basics/ToString.h src/basics/Range.h src/basics/Position.h)
 target_link_libraries(Statist ${catkin_LIBRARIES})
 
-add_executable(TEST src/robot/robot_system/RobotPilot.h src/robot/robot_system/Robot.h src/robot/flock/FlockControl.h src/various/Constants.h src/robot/flock/Statistics.h src/TEST.cpp src/logger/Time.h src/objects/Object.h src/basics/BasicStructs.h src/robot/robot_system/RobotCore.h src/basics/MyAlgorithms.h src/various/Statistical.h src/basics/ToString.h)
+add_executable(TEST src/robot/robot_system/RobotPilot.h src/robot/robot_system/Robot.h src/robot/flock/FlockControl.h src/various/Constants.h src/robot/flock/Statistics.h src/TEST.cpp src/logger/Time.h src/objects/Object.h src/basics/BasicStructs.h src/robot/robot_system/RobotCore.h src/basics/MyAlgorithms.h src/various/Statistical.h src/basics/ToString.h src/basics/Range.h src/basics/Position.h)
 target_link_libraries(TEST ${catkin_LIBRARIES})
 
 set(COMPILE_OPTIONS -Wall -Weffc++ -pedantic
@@ -80,7 +79,6 @@ set(COMPILE_OPTIONS -Wall -Weffc++ -pedantic
 
 target_compile_options(FlockRobot PRIVATE ${COMPILE_OPTIONS})
 target_compile_options(Observer PRIVATE ${COMPILE_OPTIONS})
-target_compile_options(Leader PRIVATE ${COMPILE_OPTIONS})
 target_compile_options(Statist PRIVATE ${COMPILE_OPTIONS})
 target_compile_options(TEST PRIVATE ${COMPILE_OPTIONS})
 

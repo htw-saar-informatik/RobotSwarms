@@ -7,18 +7,22 @@
 #include "ros/ros.h"
 #include <ros/subscriber.h>
 #include <turtlesim/Pose.h>
-#include "../../msgs/MissionFinished.h"
+#include "../../msgs/RobotIndex.h"
 #include "../../msgs/MissionNew.h"
+#include "../../msgs/MissionFinished.h"
+#include "../../msgs/UpdateShape.h"
 
 #include "../robot_system/Robot.h"
 #include "../../various/Constants.h"
 #include "../../logger/Logger.h"
+#include "../../basics/Range.h"
 
 #include <cmath>
 
 std::array<Robot, FLOCK_SIZE> globalSwarm;
 std::vector<unsigned int> mySwarmIndices;
-std::vector<unsigned int> robotsNotInPosition;
+std::vector<unsigned int> missingOkays;
+std::vector<Object> safeZones = {BORDER};
 
 void flockCallback(const turtlesim::PoseConstPtr &msg, const unsigned int index) {
     Robot &robot = globalSwarm[index];
@@ -33,63 +37,87 @@ void flockCallback(const turtlesim::PoseConstPtr &msg, const unsigned int index)
 }
 
 std::vector<ros::Subscriber> flockSubscriber;
+
 void subscribeToFlock() {
     ros::NodeHandle node;
 
     for (int i = 0; i < FLOCK_SIZE; i++) {
         boost::function<void(const turtlesim::PoseConstPtr &)> callback = bind(flockCallback, _1, i);
-        flockSubscriber.push_back(node.subscribe("turtle" + std::to_string(i) + "/pose", 100, callback));
+        flockSubscriber.push_back(node.subscribe("turtle" + std::to_string(i) + "/pose", ROS_QUEUE_SIZE, callback));
     }
 }
 
 std::vector<swarmRobot::MissionNewConstPtr> missions;
-void missionNewCallback(const swarmRobot::MissionNewConstPtr &mission, const unsigned int index) {
-    const std::pair<unsigned int, unsigned int> range(mission->robot_index_from, mission->robot_index_to);
 
-    Logger(INFO, "Got a new mission: Robots %d - %d", range.first, range.second)
+void missionNewCallback(const swarmRobot::MissionNewConstPtr &mission, const unsigned int index) {
+    const Range<unsigned int> robotRange(mission->robot_index_from, mission->robot_index_to);
+
+    Logger(INFO, "Got a new mission: Robots %d -> %d", robotRange.begin().get(), robotRange.end().get())
             .newLine("Object: pos(%f, %f)", mission->object_position_x, mission->object_position_y)
             .newLine("Object: size(%f, %f)", mission->object_size_x, mission->object_size_y)
             .newLine("Target: (%f, %f)", mission->target_x, mission->target_y);
 
 
-    if (alg::inRange<unsigned int>(index, range.first, range.second)) {
+    bool inverted = false;
+    if (robotRange.valueInRange(index)) {
         missions.push_back(mission);
 
         mySwarmIndices.clear();
-        for (unsigned int i = range.first; i < range.second; i++) {
+        for (unsigned int i : robotRange) {
             mySwarmIndices.push_back(i);
-            robotsNotInPosition.push_back(i);
         }
     } else {
-        auto newEnd = std::remove_if(mySwarmIndices.begin(), mySwarmIndices.end(), [range](unsigned int i) {
-            return alg::inRange<unsigned int>(i, range.first, range.second);
+        auto newEnd = std::remove_if(mySwarmIndices.begin(), mySwarmIndices.end(), [robotRange](unsigned int i) {
+            return robotRange.valueInRange(i);
         });
         mySwarmIndices.erase(newEnd, mySwarmIndices.end());
+        inverted = true;
     }
+
+
+    safeZones.emplace_back(new Rectangle(
+            Position{mission->object_position_x, mission->object_position_y},
+            Size{mission->object_size_x, mission->object_size_y},
+            inverted),mission->id);
 }
 
-void missionInPositionCallback(const swarmRobot::MissionFinishedConstPtr &index) {
-    auto pos = std::find(robotsNotInPosition.begin(), robotsNotInPosition.end(), index->index);
-    if (pos == robotsNotInPosition.end()) {
+void missionInPositionCallback(const swarmRobot::RobotIndexConstPtr &index) {
+    Logger(DEBUG, 0, "Incoming okay: %d", index->index);
+    Logger(DEBUG, 0, "1Left: %s", myString::toString(missingOkays).c_str());
+    auto pos = std::find(missingOkays.begin(), missingOkays.end(), index->index);
+    if (pos == missingOkays.end()) {
         return;
     }
-    robotsNotInPosition.erase(pos);
+    missingOkays.erase(pos);
 
-    std::string left;
-    for (unsigned int i : robotsNotInPosition) left += std::to_string(i) + ", ";
-    Logger(INFO, "%d reports in position, left: %s", index->index, left.c_str());
+    Logger(DEBUG, 0, "2Left: %s", myString::toString(missingOkays).c_str());
 }
 
 void missionFinishedCallback(const swarmRobot::MissionFinishedConstPtr &finishedMission, const unsigned int myIndex) {
-    Logger(INFO, "%d reports finished mission", finishedMission->index);
+    Logger(DEBUG, "%d reports finished mission", finishedMission->robotIndex);
 
-    if (finishedMission->index == myIndex) {
+    if (finishedMission->robotIndex == myIndex) {
         mySwarmIndices.clear();
         for (unsigned int i = 0; i < FLOCK_SIZE; i++) {
             mySwarmIndices.push_back(i);
         }
     } else {
-        mySwarmIndices.push_back(finishedMission->index);
+        mySwarmIndices.push_back(finishedMission->robotIndex);
+    }
+
+    const unsigned long id = finishedMission->missionId;
+    auto pos = std::remove_if(safeZones.begin(), safeZones.end(), [=](const Object &o) {
+        return id == o.getId();
+    });
+
+    safeZones.erase(pos, safeZones.end());
+}
+
+void updateObject(const swarmRobot::UpdateShapeConstPtr &update) {
+    for (auto &object : safeZones) {
+        if (object.getId() == update->mission_index) {
+            object.move_absolute(Position(update->pos_x, update->pos_y));
+        }
     }
 }
 

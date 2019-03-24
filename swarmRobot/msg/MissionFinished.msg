@@ -1,1 +1,2 @@
-uint8 index
+uint8 robotIndex
+uint64 missionId

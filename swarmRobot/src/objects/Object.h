@@ -6,6 +6,7 @@
 
 #include <vector>
 #include <memory>
+#include <algorithm>
 
 #include "Geometry.h"
 #include "../logger/Logger.h"
@@ -13,22 +14,27 @@
 
 class Object {
 private:
-    std::vector<std::unique_ptr<Geometry>> shapes;
+    std::vector<std::shared_ptr<Geometry>> shapes;
+    unsigned int id;
 
 public:
     Object() = delete;
 
-    Object(Geometry *movableGeometry) {
+    Object(Geometry *movableGeometry, unsigned int id)
+            : id(id) {
         addShape(movableGeometry);
     }
 
-    void move_relative(const Position &pos) {
-        for (const auto &i : shapes) {
-            i->move_relative(pos);
-        }
+    Object(const Object &other) : id(other.id) {
+        this->shapes = other.shapes;
     }
 
-    void move_absolute(const Position &pos) {
+    Object &operator=(const Object &other) {
+        this->id = other.id;
+        this->shapes = other.shapes;
+    };
+
+    void move_absolute(const Position pos) {
         for (const auto &i : shapes) {
             i->move_absolute(pos);
         }
@@ -74,8 +80,6 @@ public:
         return Size(max_x - min_x, max_y - min_y);
     }
 
-    Object &operator=(Object &other) = delete;
-
     void print() const {
         for (const auto &s : shapes) {
             Logger(ALWAYS, 1, s->toString());
@@ -98,5 +102,9 @@ public:
             << ", MinY: " << min_y
             << ", MaxY: " << max_y;
         return out.str();
+    }
+
+    unsigned int getId() const {
+        return id;
     }
 };

@@ -15,4 +15,13 @@ namespace myString {
         out << std::fixed << a_value;
         return out.str();
     }
+
+    template <typename T>
+    std::string toString(const std::vector<T> &v) {
+        std::string out;
+        for (const T &t : v) {
+            out += std::to_string(t) + ", ";
+        }
+        return out;
+    }
 }

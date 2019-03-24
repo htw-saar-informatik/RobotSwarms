@@ -4,12 +4,14 @@
 #pragma once
 
 #include "../basics/BasicStructs.h"
+#include "../basics/Position.h"
 
 class Geometry {
 public:
     Position position;
 
-    Geometry(Position pos) : position(pos) {
+    Geometry(Position pos, unsigned long id = 0)
+            : position(pos) {
 
     }
 
@@ -46,15 +48,18 @@ public:
 class Rectangle : public Geometry {
 private:
     const Size recSize;
+    const bool inverted;
 
 public:
-    Rectangle(Position pos, Size size)
-            : Geometry(pos), recSize(size) {
+    Rectangle(Position pos, Size size, bool inverted = false)
+            : Geometry(pos), recSize(size), inverted(inverted) {
     }
 
     virtual bool inBoundary(const Position &pos) const override {
-        return (pos.x > min_x()) and (pos.x < max_x())
-               and (pos.y > min_y()) and (pos.y < max_y());
+        const bool inside = (pos.x > min_x()) and (pos.x < max_x())
+                            and (pos.y > min_y()) and (pos.y < max_y());
+
+        return (!inverted) == inside;
     }
 
     virtual float max_x() const override {
